@@ -19,9 +19,17 @@ def hello(name):
     return f"Sorry, the page {escape(name)} do not exist!"
 
 
-# DB Connection
+# DB Connection + creation of tables
 conn = sqlite3.connect("flaskProject.db")
 print("Opened database successfully")
+cursor = conn.cursor()
+
+sql_file=open("schema.sql")
+sql_as_string = sql_file.read()
+cursor.executescript(sql_as_string)
+
+for row in cursor.execute("SELECT * FROM user"):
+    print(row)
 
 
 def get_db_connection():
@@ -36,15 +44,4 @@ def close_db(e=None):
         db.close()
 
 
-def init_db():
-    db = get_db_connection()
 
-    with current_app.open_resource("schema.sql") as f:
-        db.executescript(f.read().decode("utf8"))
-
-
-@click.command("init-db")
-@with_appcontext
-def init_db_command():
-    init_db()
-    click.echo("Initialized the database")
