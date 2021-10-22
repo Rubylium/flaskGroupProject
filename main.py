@@ -1,5 +1,5 @@
 import click
-from flask import Flask
+from flask import Flask, render_template
 from flask.cli import with_appcontext
 from markupsafe import escape
 import sqlite3
@@ -9,8 +9,8 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def index():
+    return render_template('index.html')
 
 
 @app.route("/<name>")
@@ -27,11 +27,6 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-
-cur = get_db_connection()
-
-test = cur.execute("SELECT * FROM users")
-print(test)
 
 
 def close_db(e=None):
