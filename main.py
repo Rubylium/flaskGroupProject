@@ -1,14 +1,14 @@
-import bp as bp
-import click
 from flask import Flask, render_template, session, request, flash, url_for
-from flask.cli import with_appcontext
 from markupsafe import escape
 import sqlite3
-from flask import current_app, g
+from flask import g
 from werkzeug.security import check_password_hash
 from werkzeug.utils import redirect
 
 app = Flask(__name__)
+
+# Set the secret key to some random bytes. Keep this really secret!
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # Routes
 
