@@ -1,4 +1,3 @@
-import con as con
 from flask import Flask
 from markupsafe import escape
 import sqlite3
@@ -20,20 +19,20 @@ def hello(name):
 conn = sqlite3.connect('flaskProject.db')
 print("Opened database successfully")
 
-cur = con.cursor()
+
+def get_db_connection():
+    conn = sqlite3.connect('flaskProject.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
-def get_db():
-    if 'flaskProject' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['flaskProject'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
-    return g.db
+cur = get_db_connection()
+
+test = cur.execute("SELECT * FROM users")
+print(test)
 
 
-def close_db(e=None):
+def close_db(e = None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
