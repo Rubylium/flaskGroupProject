@@ -1,0 +1,15 @@
+img{
+    width: 200px;
+}
+#img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+button{
+    background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+}
