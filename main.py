@@ -28,8 +28,8 @@ def index():
 
 @app.route("/clicker")
 def clicker():
-    rows = nbPoints()
-    return render_template("clicker.html", rows=str(rows[0]))
+    data = nbPoints()
+    return render_template("clicker.html", rows=str(data[0]))
 
 @app.route("/<name>")
 def hello(name):
@@ -83,8 +83,8 @@ def PrintAllUsers():
 
 
 def nbPoints():
-    cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1")
-    data = cursor.fetchall()
+    cursor = get_db_connection()
+    data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1").fetchone()
     return data
 
 
