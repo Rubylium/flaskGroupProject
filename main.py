@@ -102,8 +102,11 @@ def nbPoints(id_user):
     return data
 
 
-test=nbPoints(1)
-print(test[0])
+def clickPoint(id_user):
+    cursor = get_db_connection()
+    points = nbPoints(session["user_id"]) + 1
+    data = cursor.execute("UPDATE userPoints SET userPoints = ? WHERE id_user=?", (points, id_user))
+    return data
 
 
 def close_db():
