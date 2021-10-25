@@ -78,14 +78,12 @@ print(nbPoints())
 
 
 def get_db_connection():
-    cursor = conn.cursor()
-    return cursor
+    link = sqlite3.connect("flaskProject.db")
+    db = conn.cursor()
+    return db
 
 
 def close_db():
     db = g.pop("db", None)
     if db is not None:
         db.close()
-
-
-
