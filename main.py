@@ -12,7 +12,6 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # Routes
 
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
 @app.route("/")
@@ -20,6 +19,10 @@ def index():
     rows = GetAllUsersData()
     return render_template("index.html", rows=rows)
 
+@app.route("/clicker")
+def clicker():
+    rows = nbPoints()
+    return render_template("clicker.html", rows=str(rows[0]))
 
 @app.route("/<name>")
 def hello(name):
@@ -55,8 +58,6 @@ conn = sqlite3.connect("flaskProject.db")
 print("Opened database successfully")
 cursor = conn.cursor()
 sql_file = open("schema.sql")
-
-sql_file = open("schema.sql")
 sql_as_string = sql_file.read()
 cursor.executescript(sql_as_string)
 
@@ -74,13 +75,12 @@ def PrintAllUsers():
 
 
 def nbPoints():
-    cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1")
-    data = cursor.fetchall()
+    db = get_db_connection()
+    data = db.execute("SELECT nbPoints FROM userPoints WHERE id=1").fetchone()
     return data
 
-
-print(nbPoints())
-
+data=nbPoints()
+print(data,data[0])
 
 def get_db_connection():
     conn = sqlite3.connect("flaskProject.db")
@@ -92,6 +92,4 @@ def close_db():
     db = g.pop("db", None)
     if db is not None:
         db.close()
-
-
 
