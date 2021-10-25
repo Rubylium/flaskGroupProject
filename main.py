@@ -30,8 +30,9 @@ def index():
 
 @app.route("/clicker")
 def clicker():
-    rows = nbPoints()
-    return render_template("clicker.html", rows=str(rows[0]))
+    data = nbPoints()
+    return render_template("clicker.html", rows=str(data[0]))
+
 
 
 @app.route("/<name>")
@@ -64,13 +65,15 @@ def login():
 
 
 # DB Connection + creation of tables
-conn = sqlite3.connect("flaskProject.db")
-print("Opened database successfully")
-cursor = conn.cursor()
-sql_file = open("schema.sql")
+def InitDatabse():
+    cursor = get_db_connection()
+    sql_file = open("schema.sql")
+    sql_as_string = sql_file.read()
+    cursor.executescript(sql_as_string)
+    print("Database init done!")
 
-sql_as_string = sql_file.read()
-cursor.executescript(sql_as_string)
+
+InitDatabse()
 
 
 def GetAllUsersData():
@@ -83,13 +86,15 @@ def GetAllUsersData():
 
 def PrintAllUsers():
     print("Showing all users")
+
+    cursor = get_db_connection()
     for row in cursor.execute("SELECT * FROM user"):
         print(row)
 
 
 def nbPoints():
-    cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1")
-    data = cursor.fetchall()
+    cursor = get_db_connection()
+    data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1").fetchone()
     return data
 
 
