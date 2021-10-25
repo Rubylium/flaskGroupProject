@@ -82,8 +82,33 @@ def get_db_connection():
     db = link.cursor()
     return db
 
+def GetConnDb():
+    conn = sqlite3.connect("flaskProject.db")
+    return conn
 
 def close_db():
     db = g.pop("db", None)
     if db is not None:
         db.close()
+
+
+def CreateNewUser(username, password):
+    db = get_db_connection()
+    conn = GetConnDb()
+    row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
+    if row is None:
+        db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+
+        row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
+
+        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row[0])))
+        conn.commit()
+
+        print("User " + username + " created")
+    else:
+        print("User already exist, avoid creating user: " + username)
+
+
+CreateNewUser("Super", "test")
+PrintAllUsers()
