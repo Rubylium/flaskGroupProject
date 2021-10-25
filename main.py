@@ -11,25 +11,28 @@ app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
-
 def get_db_connection():
     link = sqlite3.connect("flaskProject.db")
     db = link.cursor()
     return db
 
+
 def GetConnDb():
     conn = sqlite3.connect("flaskProject.db")
     return conn
+
 
 @app.route("/")
 def index():
     rows = GetAllUsersData()
     return render_template("index.html", rows=rows)
 
+
 @app.route("/clicker")
 def clicker():
     data = nbPoints()
     return render_template("clicker.html", rows=str(data[0]))
+
 
 @app.route("/<name>")
 def hello(name):
@@ -61,13 +64,15 @@ def login():
 
 
 # DB Connection + creation of tables
-conn = sqlite3.connect("flaskProject.db")
-print("Opened database successfully")
-cursor = conn.cursor()
-sql_file = open("schema.sql")
+def InitDatabse():
+    cursor = get_db_connection()
+    sql_file = open("schema.sql")
+    sql_as_string = sql_file.read()
+    cursor.executescript(sql_as_string)
+    print("Database init done!")
 
-sql_as_string = sql_file.read()
-cursor.executescript(sql_as_string)
+
+InitDatabse()
 
 
 def GetAllUsersData():
@@ -78,6 +83,8 @@ def GetAllUsersData():
 
 def PrintAllUsers():
     print("Showing all users")
+
+    cursor = get_db_connection()
     for row in cursor.execute("SELECT * FROM user"):
         print(row)
 
