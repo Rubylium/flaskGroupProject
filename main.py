@@ -31,8 +31,8 @@ def index():
 
 @app.route("/clicker")
 def clicker():
-    data = nbPoints()
-    return render_template("clicker.html")
+    data = nbPoints(session["user_id"],)
+    return render_template("clicker.html", rows=data[0])
 
 
 @app.route("/<name>")
@@ -96,13 +96,14 @@ def PrintAllUsers():
         print(row)
 
 
-def nbPoints():
+def nbPoints(id_user):
     cursor = get_db_connection()
-    data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1").fetchone()
+    data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
     return data
 
 
-print(nbPoints())
+test=nbPoints(1)
+print(test[0])
 
 
 def close_db():
