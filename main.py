@@ -10,8 +10,6 @@ app = Flask(__name__)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# Routes
-
 
 @app.route("/")
 def index():
@@ -31,9 +29,7 @@ def login():
         password = request.form["password"]
         db = get_db_connection()
         error = None
-        user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (user,)
-        ).fetchone()
+        user = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
         if user is None:
             error = "Incorrect username."
@@ -56,7 +52,6 @@ print("Opened database successfully")
 cursor = conn.cursor()
 sql_file = open("schema.sql")
 
-sql_file = open("schema.sql")
 sql_as_string = sql_file.read()
 cursor.executescript(sql_as_string)
 
@@ -73,16 +68,47 @@ def PrintAllUsers():
         print(row)
 
 
+def nbPoints():
+    cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1")
+    data = cursor.fetchall()
+    return data
+
+
+print(nbPoints())
+
+
 def get_db_connection():
+    link = sqlite3.connect("flaskProject.db")
+    db = link.cursor()
+    return db
+
+def GetConnDb():
     conn = sqlite3.connect("flaskProject.db")
-    conn.row_factory = sqlite3.Row
     return conn
 
-
-def close_db(e=None):
+def close_db():
     db = g.pop("db", None)
     if db is not None:
         db.close()
 
 
+def CreateNewUser(username, password):
+    db = get_db_connection()
+    conn = GetConnDb()
+    row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
+    if row is None:
+        db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
 
+        row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
+
+        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row[0])))
+        conn.commit()
+
+        print("User " + username + " created")
+    else:
+        print("User already exist, avoid creating user: " + username)
+
+
+CreateNewUser("Super", "test")
+PrintAllUsers()
