@@ -14,13 +14,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 def get_db_connection():
     link = sqlite3.connect("flaskProject.db")
     link.row_factory = sqlite3.Row
-    db = link.cursor()
-    return db
-
-
-def GetConnDb():
-    conn = sqlite3.connect("flaskProject.db")
-    return conn
+    return link
 
 
 @app.route("/")
@@ -93,7 +87,10 @@ def PrintAllUsers():
 
     cursor = get_db_connection()
     for row in cursor.execute("SELECT * FROM user"):
-        print(row)
+        string = ""
+        for v in row:
+            string = string + " " + str(v)
+        print(string)
 
 
 def nbPoints():
@@ -113,16 +110,15 @@ def close_db():
 
 def CreateNewUser(username, password):
     db = get_db_connection()
-    conn = GetConnDb()
     row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
     if row is None:
         db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
-        conn.commit()
+        db.commit()
 
         row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
 
         db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row["id"])))
-        conn.commit()
+        db.commit()
 
         print("User " + username + " created")
     else:
