@@ -32,8 +32,7 @@ def index():
 @app.route("/clicker")
 def clicker():
     data = nbPoints()
-    return render_template("clicker.html", rows=str(data[0]))
-
+    return render_template("clicker.html")
 
 
 @app.route("/<name>")
@@ -52,17 +51,23 @@ def login():
 
         if user is None:
             error = "Incorrect username."
-        elif not check_password_hash(user["password"], password):
-            error = "Incorrect password."
+        # elif not check_password_hash(user["password"], password):
+        #    error = "Incorrect password."
 
         if error is None:
             session.clear()
             session["user_id"] = user["id"]
             return redirect(url_for("clicker"))
-
-        flash(error)
+        else:
+            flash(error)
 
     return render_template("index.html")
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 
 # DB Connection + creation of tables
