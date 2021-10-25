@@ -12,6 +12,8 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 # Routes
 
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
 
 @app.route("/")
 def index():
@@ -24,16 +26,14 @@ def hello(name):
     return f"Sorry, the page {escape(name)} do not exist!"
 
 
-@app.route("/", methods=("GET", "POST"))
+@app.route("/login", methods=("GET", "POST"))
 def login():
     if request.method == "POST":
         user = request.form["user"]
         password = request.form["password"]
         db = get_db_connection()
         error = None
-        user = db.execute(
-            "SELECT * FROM user WHERE username = ?", (user,)
-        ).fetchone()
+        user = db.execute("SELECT * FROM user WHERE username = ?", (user,)).fetchone()
 
         if user is None:
             error = "Incorrect username."
@@ -47,7 +47,7 @@ def login():
 
         flash(error)
 
-    return render_template("template/clicker.html")
+    return render_template("clicker.html")
 
 
 # DB Connection + creation of tables
@@ -73,12 +73,21 @@ def PrintAllUsers():
         print(row)
 
 
+def nbPoints():
+    cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1")
+    data = cursor.fetchall()
+    return data
+
+
+print(nbPoints())
+
+
 def get_db_connection():
     cursor = conn.cursor()
     return cursor
 
 
-def close_db(e=None):
+def close_db():
     db = g.pop("db", None)
     if db is not None:
         db.close()
