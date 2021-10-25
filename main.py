@@ -13,6 +13,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 def get_db_connection():
     link = sqlite3.connect("flaskProject.db")
+    link.row_factory = sqlite3.Row
     db = link.cursor()
     return db
 
@@ -114,7 +115,7 @@ def CreateNewUser(username, password):
 
         row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
 
-        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row[0])))
+        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row["id"])))
         conn.commit()
 
         print("User " + username + " created")
