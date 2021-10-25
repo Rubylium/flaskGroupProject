@@ -18,3 +18,7 @@ label{
     justify-content: center;
     align-items: center;
 }
+.button
+{
+    text-align : right; 
+}

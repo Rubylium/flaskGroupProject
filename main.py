@@ -64,10 +64,10 @@ def login():
     return render_template("index.html")
 
 
-@app.route('/logout')
+@app.route('/logout', methods=("POST",))
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 # DB Connection + creation of tables
