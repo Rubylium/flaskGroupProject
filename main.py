@@ -74,9 +74,8 @@ def PrintAllUsers():
 
 
 def get_db_connection():
-    conn = sqlite3.connect("flaskProject.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+    cursor = conn.cursor()
+    return cursor
 
 
 def close_db(e=None):
