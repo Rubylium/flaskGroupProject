@@ -10,19 +10,12 @@ app = Flask(__name__)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# Routes
-
-
 
 @app.route("/")
 def index():
     rows = GetAllUsersData()
     return render_template("index.html", rows=rows)
 
-@app.route("/clicker")
-def clicker():
-    rows = nbPoints()
-    return render_template("clicker.html", rows=str(rows[0]))
 
 @app.route("/<name>")
 def hello(name):
@@ -58,6 +51,7 @@ conn = sqlite3.connect("flaskProject.db")
 print("Opened database successfully")
 cursor = conn.cursor()
 sql_file = open("schema.sql")
+
 sql_as_string = sql_file.read()
 cursor.executescript(sql_as_string)
 
@@ -75,21 +69,46 @@ def PrintAllUsers():
 
 
 def nbPoints():
-    db = get_db_connection()
-    data = db.execute("SELECT nbPoints FROM userPoints WHERE id=1").fetchone()
+    cursor.execute("SELECT nbPoints FROM userPoints WHERE id=1")
+    data = cursor.fetchall()
     return data
 
-data=nbPoints()
-print(data,data[0])
+
+print(nbPoints())
+
 
 def get_db_connection():
-    conn = sqlite3.connect("flaskProject.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+    link = sqlite3.connect("flaskProject.db")
+    db = link.cursor()
+    return db
 
+def GetConnDb():
+    conn = sqlite3.connect("flaskProject.db")
+    return conn
 
 def close_db():
     db = g.pop("db", None)
     if db is not None:
         db.close()
 
+
+def CreateNewUser(username, password):
+    db = get_db_connection()
+    conn = GetConnDb()
+    row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
+    if row is None:
+        db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+
+        row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
+
+        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row[0])))
+        conn.commit()
+
+        print("User " + username + " created")
+    else:
+        print("User already exist, avoid creating user: " + username)
+
+
+CreateNewUser("Super", "test")
+PrintAllUsers()
