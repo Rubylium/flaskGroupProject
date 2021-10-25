@@ -79,7 +79,7 @@ print(nbPoints())
 
 def get_db_connection():
     link = sqlite3.connect("flaskProject.db")
-    db = conn.cursor()
+    db = link.cursor()
     return db
 
 
