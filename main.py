@@ -11,6 +11,16 @@ app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
+
+def get_db_connection():
+    link = sqlite3.connect("flaskProject.db")
+    db = link.cursor()
+    return db
+
+def GetConnDb():
+    conn = sqlite3.connect("flaskProject.db")
+    return conn
+
 @app.route("/")
 def index():
     rows = GetAllUsersData()
@@ -80,15 +90,6 @@ def nbPoints():
 
 print(nbPoints())
 
-
-def get_db_connection():
-    link = sqlite3.connect("flaskProject.db")
-    db = link.cursor()
-    return db
-
-def GetConnDb():
-    conn = sqlite3.connect("flaskProject.db")
-    return conn
 
 def close_db():
     db = g.pop("db", None)
