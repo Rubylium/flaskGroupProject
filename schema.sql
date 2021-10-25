@@ -8,5 +8,19 @@ CREATE TABLE IF NOT EXISTS userPoints(
     id INTEGER PRIMARY KEY,
     id_user INTEGER NOT NULL,
     nbPoints INTEGER DEFAULT '0',
+    boost INTEGER DEFAULT '1',
     FOREIGN KEY (id_user) REFERENCES user (id)
+);
+
+CREATE TABLE IF NOT EXISTS prix(
+    id_user INTEGER NOT NULL,
+    id_boost INTEGER NOT NULL,
+    prix INTEGER NOT NULL,
+    FOREIGN KEY (id_user) REFERENCES user (id),
+    FOREIGN KEY (id_boost) REFERENCES store (id)
+);
+
+CREATE TABLE IF NOT EXISTS store(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    libelle VARCHAR(25)
 );

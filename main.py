@@ -25,15 +25,31 @@ def index():
 
 @app.route("/clicker")
 def clicker():
-    data = nbPoints(session["user_id"],)
-    return render_template("clicker.html", rows=data)
+    data = nbPoints(session["user_id"], )
+
+    prixBoost = getPrix(session["user_id"])
+
+    return render_template("clicker.html", rows=data, prix=prixBoost)
 
 
 @app.route("/click", methods=("POST",))
 def click():
-    clickPoint(session["user_id"],)
-    data = nbPoints(session["user_id"],)
-    return render_template("clicker.html", rows=data)
+    clickPoint(session["user_id"], )
+    data = nbPoints(session["user_id"], )
+
+    prixBoost = getPrix(session["user_id"])
+
+    return render_template("clicker.html", rows=data, prix=prixBoost)
+
+
+@app.route("/boost", methods=("POST",))
+def boost():
+    byBoostIfPossible(session["user_id"])
+    prixBoost = getPrix(session["user_id"])
+
+    data = nbPoints(session["user_id"], )
+
+    return render_template("clicker.html", rows=data, prix=prixBoost)
 
 
 @app.route("/<name>")
@@ -100,15 +116,49 @@ def PrintAllUsers():
         print(string)
 
 
+def getBoost(id_user):
+    db = get_db_connection()
+    data = db.execute("SELECT boost FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
+    return data["boost"]
+
+
+def modifBoost(id_user):
+    db = get_db_connection()
+    boostPoints = int(getBoost(session["user_id"]))
+    modifBoost = boostPoints + 1
+    db.execute("UPDATE userPoints SET boost = ? WHERE id_user=?", (modifBoost, id_user))
+    db.commit()
+
+
+def getPrix(id_user):
+    db = get_db_connection()
+    data = db.execute("SELECT prix FROM prix WHERE id_user=?", (id_user,)).fetchone()
+    return data["prix"]
+
+
+def byBoostIfPossible(id_user):
+    db = get_db_connection()
+    points = int(nbPoints(session["user_id"]))
+    prixBoost = int(getPrix(session["user_id"]))
+    if points >= prixBoost:
+        points = points - prixBoost
+        prixBoost = prixBoost*1.5
+        db.execute("UPDATE prix SET prix = ? WHERE id_user=?", (prixBoost, id_user))
+        db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
+        db.commit()
+        modifBoost(id_user)
+
+
 def nbPoints(id_user):
-    cursor = get_db_connection()
-    data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
+    db = get_db_connection()
+    data = db.execute("SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
     return data["nbPoints"]
 
 
 def clickPoint(id_user):
     db = get_db_connection()
-    points = int(nbPoints(session["user_id"])) + 1
+    boostPoints = int(getBoost(session["user_id"]))
+    points = int(nbPoints(session["user_id"])) + boostPoints
     db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
     db.commit()
 
@@ -128,7 +178,7 @@ def CreateNewUser(username, password):
 
         row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
 
-        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row["id"])))
+        db.execute("INSERT INTO userPoints (id_user, nbPoints, boost) VALUES (?, '0', '1')", (str(row["id"])))
         db.commit()
 
         print("User " + username + " created")
@@ -137,4 +187,5 @@ def CreateNewUser(username, password):
 
 
 CreateNewUser("Super", "test")
+CreateNewUser("Amaleo", "test")
 PrintAllUsers()
