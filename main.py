@@ -10,10 +10,6 @@ app = Flask(__name__)
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-# Routes
-
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
 
 @app.route("/")
 def index():
@@ -56,7 +52,6 @@ print("Opened database successfully")
 cursor = conn.cursor()
 sql_file = open("schema.sql")
 
-sql_file = open("schema.sql")
 sql_as_string = sql_file.read()
 cursor.executescript(sql_as_string)
 
