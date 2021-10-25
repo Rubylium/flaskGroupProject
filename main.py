@@ -11,25 +11,28 @@ app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
-
 def get_db_connection():
     link = sqlite3.connect("flaskProject.db")
     db = link.cursor()
     return db
 
+
 def GetConnDb():
     conn = sqlite3.connect("flaskProject.db")
     return conn
+
 
 @app.route("/")
 def index():
     rows = GetAllUsersData()
     return render_template("index.html", rows=rows)
 
+
 @app.route("/clicker")
 def clicker():
     rows = nbPoints()
     return render_template("clicker.html", rows=str(rows[0]))
+
 
 @app.route("/<name>")
 def hello(name):
@@ -53,11 +56,11 @@ def login():
         if error is None:
             session.clear()
             session["user_id"] = user["id"]
-            return redirect(url_for("index"))
+            return redirect(url_for("clicker"))
 
         flash(error)
 
-    return render_template("clicker.html")
+    return render_template("index.html")
 
 
 # DB Connection + creation of tables
@@ -72,7 +75,9 @@ cursor.executescript(sql_as_string)
 
 def GetAllUsersData():
     db = get_db_connection()
-    rows = db.execute("SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user").fetchall()
+    rows = db.execute(
+        "SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user"
+    ).fetchall()
     return rows
 
 
@@ -102,12 +107,18 @@ def CreateNewUser(username, password):
     conn = GetConnDb()
     row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
     if row is None:
-        db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
+        db.execute(
+            "INSERT INTO user (username, password) VALUES (?, ?)", (username, password)
+        )
         conn.commit()
 
-        row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
+        row = db.execute(
+            "SELECT id FROM user WHERE username = ?", (username,)
+        ).fetchone()
 
-        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row[0])))
+        db.execute(
+            "INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row[0]))
+        )
         conn.commit()
 
         print("User " + username + " created")
