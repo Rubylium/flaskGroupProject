@@ -26,7 +26,14 @@ def index():
 @app.route("/clicker")
 def clicker():
     data = nbPoints(session["user_id"],)
-    return render_template("clicker.html", rows=data[0])
+    return render_template("clicker.html", rows=data)
+
+
+@app.route("/click", methods=("POST",))
+def click():
+    clickPoint(session["user_id"],)
+    data = nbPoints(session["user_id"],)
+    return render_template("clicker.html", rows=data)
 
 
 @app.route("/<name>")
@@ -96,14 +103,14 @@ def PrintAllUsers():
 def nbPoints(id_user):
     cursor = get_db_connection()
     data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
-    return data
+    return data["nbPoints"]
 
 
 def clickPoint(id_user):
-    cursor = get_db_connection()
-    points = nbPoints(session["user_id"]) + 1
-    data = cursor.execute("UPDATE userPoints SET userPoints = ? WHERE id_user=?", (points, id_user))
-    return data
+    db = get_db_connection()
+    points = int(nbPoints(session["user_id"])) + 1
+    db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
+    db.commit()
 
 
 def close_db():
