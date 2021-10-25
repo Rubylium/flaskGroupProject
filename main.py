@@ -35,6 +35,7 @@ def clicker():
     return render_template("clicker.html", rows=str(data[0]))
 
 
+
 @app.route("/<name>")
 def hello(name):
     return f"Sorry, the page {escape(name)} do not exist!"
@@ -57,11 +58,11 @@ def login():
         if error is None:
             session.clear()
             session["user_id"] = user["id"]
-            return redirect(url_for("index"))
+            return redirect(url_for("clicker"))
 
         flash(error)
 
-    return render_template("clicker.html")
+    return render_template("index.html")
 
 
 # DB Connection + creation of tables
