@@ -23,7 +23,7 @@ def hello(name):
     return f"Sorry, the page {escape(name)} do not exist!"
 
 
-@app.route("/", methods=("GET", "POST"))
+@app.route("/login", methods=("GET", "POST"))
 def login():
     if request.method == "POST":
         user = request.form["user"]
@@ -46,7 +46,7 @@ def login():
 
         flash(error)
 
-    return render_template("template/clicker.html")
+    return render_template("clicker.html")
 
 
 # DB Connection + creation of tables
