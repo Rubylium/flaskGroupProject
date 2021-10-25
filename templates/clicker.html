@@ -8,11 +8,17 @@
     <title>Cookie</title>
   </head>
   <body>
+  <form action="{{url_for('logout')}}" method="post">
+      <div class="button">
+          <button type="submit">Deconnexion</button>
+      </div>
+    </form>
     <div id="img">
       <button id="" class="" type="submit"><img src="{{url_for('static',filename='images/cookie.png')}}"/></button>
     </div>
     <div>
       <label>{{rows}}</label>
     </div>
+
   </body>
 </html>
