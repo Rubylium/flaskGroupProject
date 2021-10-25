@@ -25,7 +25,9 @@ def index():
 
 @app.route("/clicker")
 def clicker():
-    data = nbPoints(session["user_id"],)
+    data = nbPoints(
+        session["user_id"],
+    )
     return render_template("clicker.html", rows=data[0])
 
 
@@ -58,10 +60,10 @@ def login():
     return render_template("index.html")
 
 
-@app.route('/logout', methods=("POST",))
+@app.route("/logout", methods=("POST",))
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
 
 # DB Connection + creation of tables
@@ -78,7 +80,9 @@ InitDatabse()
 
 def GetAllUsersData():
     db = get_db_connection()
-    rows = db.execute("SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user").fetchall()
+    rows = db.execute(
+        "SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user"
+    ).fetchall()
     return rows
 
 
@@ -95,12 +99,10 @@ def PrintAllUsers():
 
 def nbPoints(id_user):
     cursor = get_db_connection()
-    data = cursor.execute("SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
+    data = cursor.execute(
+        "SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)
+    ).fetchone()
     return data
-
-
-test=nbPoints(1)
-print(test[0])
 
 
 def close_db():
@@ -113,12 +115,19 @@ def CreateNewUser(username, password):
     db = get_db_connection()
     row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
     if row is None:
-        db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
+        db.execute(
+            "INSERT INTO user (username, password) VALUES (?, ?)", (username, password)
+        )
         db.commit()
 
-        row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
+        row = db.execute(
+            "SELECT id FROM user WHERE username = ?", (username,)
+        ).fetchone()
 
-        db.execute("INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')", (str(row["id"])))
+        db.execute(
+            "INSERT INTO userPoints (id_user, nbPoints) VALUES (?, '0')",
+            (str(row["id"])),
+        )
         db.commit()
 
         print("User " + username + " created")
