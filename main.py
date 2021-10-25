@@ -16,6 +16,10 @@ def index():
     rows = GetAllUsersData()
     return render_template("index.html", rows=rows)
 
+@app.route("/clicker")
+def clicker():
+    rows = nbPoints()
+    return render_template("clicker.html", rows=str(rows[0]))
 
 @app.route("/<name>")
 def hello(name):
