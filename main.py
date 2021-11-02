@@ -27,9 +27,9 @@ def index():
 def clicker():
     data = nbPoints(session["user_id"], )
 
-    prixBoost = getPrix(session["user_id"])
+    priceBoost = getPrice(session["user_id"])
 
-    return render_template("clicker.html", rows=data, prix=prixBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost)
 
 
 @app.route("/click", methods=("POST",))
@@ -37,19 +37,19 @@ def click():
     clickPoint(session["user_id"], )
     data = nbPoints(session["user_id"], )
 
-    prixBoost = getPrix(session["user_id"])
+    priceBoost = getPrice(session["user_id"])
 
-    return render_template("clicker.html", rows=data, prix=prixBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost)
 
 
 @app.route("/boost", methods=("POST",))
 def boost():
     buyBoostIfPossible(session["user_id"])
-    prixBoost = getPrix(session["user_id"])
+    priceBoost = getPrice(session["user_id"])
 
     data = nbPoints(session["user_id"], )
 
-    return render_template("clicker.html", rows=data, prix=prixBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost)
 
 
 @app.route("/<name>")
@@ -130,20 +130,20 @@ def modifBoost(id_user):
     db.commit()
 
 
-def getPrix(id_user):
+def getPrice(id_user):
     db = get_db_connection()
-    data = db.execute("SELECT prix FROM prix WHERE id_user=?", (id_user,)).fetchone()
-    return data["prix"]
+    data = db.execute("SELECT price FROM boostPrice WHERE id_user=?", (id_user,)).fetchone()
+    return data["price"]
 
 
 def buyBoostIfPossible(id_user):
     db = get_db_connection()
     points = int(nbPoints(session["user_id"]))
-    prixBoost = int(getPrix(session["user_id"]))
-    if points >= prixBoost:
-        points = points - prixBoost
-        prixBoost = prixBoost*1.5
-        db.execute("UPDATE prix SET prix = ? WHERE id_user=?", (prixBoost, id_user))
+    priceBoost = int(getPrice(session["user_id"]))
+    if points >= priceBoost:
+        points = points - priceBoost
+        priceBoost = priceBoost * 1.5
+        db.execute("UPDATE boostPrice SET price = ? WHERE id_user=?", (priceBoost, id_user))
         db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
         db.commit()
         modifBoost(id_user)

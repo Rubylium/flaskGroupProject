@@ -12,12 +12,10 @@ CREATE TABLE IF NOT EXISTS userPoints(
     FOREIGN KEY (id_user) REFERENCES user (id)
 );
 
-CREATE TABLE IF NOT EXISTS prix(
+CREATE TABLE IF NOT EXISTS boostPrice(
     id_user INTEGER NOT NULL,
-    id_boost INTEGER NOT NULL,
-    prix INTEGER NOT NULL,
-    FOREIGN KEY (id_user) REFERENCES user (id),
-    FOREIGN KEY (id_boost) REFERENCES store (id)
+    price INTEGER DEFAULT '50',
+    FOREIGN KEY (id_user) REFERENCES user (id)
 );
 
 CREATE TABLE IF NOT EXISTS store(
