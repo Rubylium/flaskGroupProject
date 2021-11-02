@@ -44,7 +44,7 @@ def click():
 
 @app.route("/boost", methods=("POST",))
 def boost():
-    byBoostIfPossible(session["user_id"])
+    buyBoostIfPossible(session["user_id"])
     prixBoost = getPrix(session["user_id"])
 
     data = nbPoints(session["user_id"], )
@@ -136,7 +136,7 @@ def getPrix(id_user):
     return data["prix"]
 
 
-def byBoostIfPossible(id_user):
+def buyBoostIfPossible(id_user):
     db = get_db_connection()
     points = int(nbPoints(session["user_id"]))
     prixBoost = int(getPrix(session["user_id"]))
@@ -161,12 +161,6 @@ def clickPoint(id_user):
     points = int(nbPoints(session["user_id"])) + boostPoints
     db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
     db.commit()
-
-
-def close_db():
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
 
 
 def CreateNewUser(username, password):
