@@ -12,15 +12,17 @@ CREATE TABLE IF NOT EXISTS userPoints(
     FOREIGN KEY (id_user) REFERENCES user (id)
 );
 
-CREATE TABLE IF NOT EXISTS boostPrice(
+CREATE TABLE IF NOT EXISTS userBoost(
     id_user INTEGER NOT NULL,
-    price INTEGER DEFAULT '50',
+    id_store INTEGER NOT NULL,
+    FOREIGN KEY (id_store) REFERENCES store (id)
     FOREIGN KEY (id_user) REFERENCES user (id)
 );
 
-CREATE TABLE IF NOT EXISTS store(
+CREATE TABLE IF NOT EXISTS store (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     libelle VARCHAR(25),
-    price INTEGER NOT NULL,
-    boostActivate INTEGER DEFAULT '0'
+    pointToAdd INTEGER NOT NULL,
+    defaultPrice INTEGER NOT NULL,
+    uniqueBoost INTEGER DEFAULT '0'
 );
