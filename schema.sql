@@ -20,5 +20,7 @@ CREATE TABLE IF NOT EXISTS boostPrice(
 
 CREATE TABLE IF NOT EXISTS store(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    libelle VARCHAR(25)
+    libelle VARCHAR(25),
+    price INTEGER NOT NULL,
+    boostActivate INTEGER DEFAULT '0'
 );
