@@ -163,12 +163,6 @@ def clickPoint(id_user):
     db.commit()
 
 
-def close_db():
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
-
-
 def CreateNewUser(username, password):
     db = get_db_connection()
     row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
