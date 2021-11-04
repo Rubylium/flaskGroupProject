@@ -21,11 +21,14 @@
     <div>
       <label>{{rows}}</label>
     </div>
+    {% for v in price %}
       <form action="{{url_for('boost')}}" method="post">
-      <div>
-        <button type="submit">BOOST {{prix}} points</button>
-      </div>
-    </form>
+          <div>
+            <input id="boostId" name="boostId" type="hidden" value="{{v['id']}}">
+            <button type="submit">BOOST {{v["libelle"]}} pour {{v["price"]}} points (Level {{v["level"]}} )</button>
+          </div>
+      </form>
+    {% endfor %}
 
   </body>
 </html>

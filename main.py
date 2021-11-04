@@ -27,9 +27,9 @@ def index():
 def clicker():
     data = nbPoints(session["user_id"], )
 
-    prixBoost = getPrix(session["user_id"])
+    priceBoost = getPrice(session["user_id"])
 
-    return render_template("clicker.html", rows=data, prix=prixBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost)
 
 
 @app.route("/click", methods=("POST",))
@@ -37,19 +37,19 @@ def click():
     clickPoint(session["user_id"], )
     data = nbPoints(session["user_id"], )
 
-    prixBoost = getPrix(session["user_id"])
+    priceBoost = getPrice(session["user_id"])
 
-    return render_template("clicker.html", rows=data, prix=prixBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost)
 
 
 @app.route("/boost", methods=("POST",))
 def boost():
-    byBoostIfPossible(session["user_id"])
-    prixBoost = getPrix(session["user_id"])
-
+    boostId = request.form["boostId"]
+    buyBoostIfPossible(session["user_id"], boostId)
+    priceBoost = getPrice(session["user_id"])
     data = nbPoints(session["user_id"], )
 
-    return render_template("clicker.html", rows=data, prix=prixBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost)
 
 
 @app.route("/<name>")
@@ -116,37 +116,65 @@ def PrintAllUsers():
         print(string)
 
 
-def getBoost(id_user):
+def getPriceForStoreId(id_user, store_id):
+    priceToReturn = 0
     db = get_db_connection()
-    data = db.execute("SELECT boost FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
-    return data["boost"]
+    data = db.execute("SELECT * FROM store WHERE id = ?", (store_id)).fetchone()
+    basePrice = data["defaultPrice"]
+    data = db.execute("SELECT count(*) FROM userBoost WHERE id_user = ? AND id_store = ?", (id_user, store_id)).fetchone()
 
+    if data[0] > 0:
+        priceToReturn = (basePrice * data[0]) * 1.25
+    else:
+        priceToReturn = basePrice
 
-def modifBoost(id_user):
+    return priceToReturn
+
+def getPrice(id_user):
     db = get_db_connection()
-    boostPoints = int(getBoost(session["user_id"]))
-    modifBoost = boostPoints + 1
-    db.execute("UPDATE userPoints SET boost = ? WHERE id_user=?", (modifBoost, id_user))
-    db.commit()
+    data = db.execute("SELECT * FROM store", ())
+    dataToSend = []
+    for row in data:
+        tempData = {}
+        tempData["id"] = row[0]
+        tempData["libelle"] = row[1]
+        tempData["uniqueBoost"] = row[4]
+        basePrice = row[3]
+        data = db.execute("SELECT count(*) FROM userBoost WHERE id_user = ? AND id_store = ?",(id_user, tempData["id"])).fetchone()
+        if data[0] > 0:
+            tempData["price"] = (basePrice * data[0]) * 1.25
+        else:
+            tempData["price"] = basePrice
+        tempData["level"] = data[0]
+        if tempData["uniqueBoost"] == 1:
+            if data[0] == 0:
+                dataToSend.insert(0, tempData)
+        else:
+            dataToSend.insert(0, tempData)
+    return dataToSend
 
-
-def getPrix(id_user):
+def getUserCurrentPointToAdd(id_user):
     db = get_db_connection()
-    data = db.execute("SELECT prix FROM prix WHERE id_user=?", (id_user,)).fetchone()
-    return data["prix"]
+    data = db.execute("SELECT count(*) FROM userBoost WHERE id_user = ?",(id_user,)).fetchone()
+    if data[0] > 0:
+        rows = db.execute("SELECT userBoost.id_user, store.pointToAdd FROM userBoost INNER JOIN store ON userBoost.id_store = store.id WHERE id_user = ?",(id_user,))
+        pointToAdd = 0
+        for row in rows:
+            pointToAdd = pointToAdd + row[1]
+        return pointToAdd
+    else:
+        return 0
 
 
-def byBoostIfPossible(id_user):
+def buyBoostIfPossible(id_user, boostId):
     db = get_db_connection()
     points = int(nbPoints(session["user_id"]))
-    prixBoost = int(getPrix(session["user_id"]))
-    if points >= prixBoost:
-        points = points - prixBoost
-        prixBoost = prixBoost*1.5
-        db.execute("UPDATE prix SET prix = ? WHERE id_user=?", (prixBoost, id_user))
+    priceBoost = getPriceForStoreId(session["user_id"], boostId)
+    if points >= priceBoost:
+        points = points - priceBoost
+        db.execute("INSERT INTO userBoost (id_user, id_store) VALUES (?, ?)", (id_user, boostId))
         db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
         db.commit()
-        modifBoost(id_user)
 
 
 def nbPoints(id_user):
@@ -157,16 +185,10 @@ def nbPoints(id_user):
 
 def clickPoint(id_user):
     db = get_db_connection()
-    boostPoints = int(getBoost(session["user_id"]))
-    points = int(nbPoints(session["user_id"])) + boostPoints
+    boostPoints = getUserCurrentPointToAdd(id_user)
+    points = int(nbPoints(session["user_id"])) + 1 + boostPoints
     db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
     db.commit()
-
-
-def close_db():
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
 
 
 def CreateNewUser(username, password):
@@ -175,9 +197,7 @@ def CreateNewUser(username, password):
     if row is None:
         db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
         db.commit()
-
         row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
-
         db.execute("INSERT INTO userPoints (id_user, nbPoints, boost) VALUES (?, '0', '1')", (str(row["id"])))
         db.commit()
 
@@ -186,6 +206,21 @@ def CreateNewUser(username, password):
         print("User already exist, avoid creating user: " + username)
 
 
+def CreateNewBoost(label, pointToAdd, price, unique):
+    db = get_db_connection()
+    row = db.execute("SELECT * FROM store WHERE libelle = ?", (label,)).fetchone()
+    if row is None:
+        db.execute("INSERT INTO store (libelle, pointToAdd, defaultPrice, uniqueBoost) VALUES (?, ?, ?, ?)", (label, pointToAdd, price, unique))
+        db.commit()
+        print("Boost " + label + " created")
+    else:
+        print("Boost already exist, avoid creating Boost: " + str(row[0]), str(row[1]), str(row[2]), str(row[3]))
+
 CreateNewUser("Super", "test")
 CreateNewUser("Amaleo", "test")
 PrintAllUsers()
+
+CreateNewBoost("+1 points", 1, 20, 0)
+CreateNewBoost("+5 points", 5, 150, 0)
+CreateNewBoost("+20 points", 20, 350, 0)
+CreateNewBoost("BelleDelphine", 0, 500, 1)
