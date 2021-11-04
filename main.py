@@ -25,17 +25,24 @@ def index():
 
 @app.route("/clicker")
 def clicker():
-    data = nbPoints(session["user_id"], )
+    data = nbPoints(
+        session["user_id"],
+    )
 
     priceBoost = getPrice(session["user_id"])
+    name = getName(session["user_id"])
 
-    return render_template("clicker.html", rows=data, price=priceBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost, name=name)
 
 
 @app.route("/click", methods=("POST",))
 def click():
-    clickPoint(session["user_id"], )
-    data = nbPoints(session["user_id"], )
+    clickPoint(
+        session["user_id"],
+    )
+    data = nbPoints(
+        session["user_id"],
+    )
 
     priceBoost = getPrice(session["user_id"])
 
@@ -47,7 +54,9 @@ def boost():
     boostId = request.form["boostId"]
     buyBoostIfPossible(session["user_id"], boostId)
     priceBoost = getPrice(session["user_id"])
-    data = nbPoints(session["user_id"], )
+    data = nbPoints(
+        session["user_id"],
+    )
 
     return render_template("clicker.html", rows=data, price=priceBoost)
 
@@ -68,8 +77,8 @@ def login():
 
         if user is None:
             error = "Incorrect username."
-        # elif not check_password_hash(user["password"], password):
-        #    error = "Incorrect password."
+        elif user["password"] != password:
+            error = "Incorrect password."
 
         if error is None:
             session.clear()
@@ -81,10 +90,10 @@ def login():
     return render_template("index.html")
 
 
-@app.route('/logout', methods=("POST",))
+@app.route("/logout", methods=("POST",))
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
 
 # DB Connection + creation of tables
@@ -101,7 +110,9 @@ InitDatabse()
 
 def GetAllUsersData():
     db = get_db_connection()
-    rows = db.execute("SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user").fetchall()
+    rows = db.execute(
+        "SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user"
+    ).fetchall()
     return rows
 
 
@@ -121,7 +132,10 @@ def getPriceForStoreId(id_user, store_id):
     db = get_db_connection()
     data = db.execute("SELECT * FROM store WHERE id = ?", (store_id)).fetchone()
     basePrice = data["defaultPrice"]
-    data = db.execute("SELECT count(*) FROM userBoost WHERE id_user = ? AND id_store = ?", (id_user, store_id)).fetchone()
+    data = db.execute(
+        "SELECT count(*) FROM userBoost WHERE id_user = ? AND id_store = ?",
+        (id_user, store_id),
+    ).fetchone()
 
     if data[0] > 0:
         priceToReturn = (basePrice * data[0]) * 1.25
@@ -129,6 +143,7 @@ def getPriceForStoreId(id_user, store_id):
         priceToReturn = basePrice
 
     return priceToReturn
+
 
 def getPrice(id_user):
     db = get_db_connection()
@@ -140,7 +155,10 @@ def getPrice(id_user):
         tempData["libelle"] = row[1]
         tempData["uniqueBoost"] = row[4]
         basePrice = row[3]
-        data = db.execute("SELECT count(*) FROM userBoost WHERE id_user = ? AND id_store = ?",(id_user, tempData["id"])).fetchone()
+        data = db.execute(
+            "SELECT count(*) FROM userBoost WHERE id_user = ? AND id_store = ?",
+            (id_user, tempData["id"]),
+        ).fetchone()
         if data[0] > 0:
             tempData["price"] = (basePrice * data[0]) * 1.25
         else:
@@ -153,11 +171,17 @@ def getPrice(id_user):
             dataToSend.insert(0, tempData)
     return dataToSend
 
+
 def getUserCurrentPointToAdd(id_user):
     db = get_db_connection()
-    data = db.execute("SELECT count(*) FROM userBoost WHERE id_user = ?",(id_user,)).fetchone()
+    data = db.execute(
+        "SELECT count(*) FROM userBoost WHERE id_user = ?", (id_user,)
+    ).fetchone()
     if data[0] > 0:
-        rows = db.execute("SELECT userBoost.id_user, store.pointToAdd FROM userBoost INNER JOIN store ON userBoost.id_store = store.id WHERE id_user = ?",(id_user,))
+        rows = db.execute(
+            "SELECT userBoost.id_user, store.pointToAdd FROM userBoost INNER JOIN store ON userBoost.id_store = store.id WHERE id_user = ?",
+            (id_user,),
+        )
         pointToAdd = 0
         for row in rows:
             pointToAdd = pointToAdd + row[1]
@@ -172,14 +196,21 @@ def buyBoostIfPossible(id_user, boostId):
     priceBoost = getPriceForStoreId(session["user_id"], boostId)
     if points >= priceBoost:
         points = points - priceBoost
-        db.execute("INSERT INTO userBoost (id_user, id_store) VALUES (?, ?)", (id_user, boostId))
-        db.execute("UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user))
+        db.execute(
+            "INSERT INTO userBoost (id_user, id_store) VALUES (?, ?)",
+            (id_user, boostId),
+        )
+        db.execute(
+            "UPDATE userPoints SET nbPoints = ? WHERE id_user=?", (points, id_user)
+        )
         db.commit()
 
 
 def nbPoints(id_user):
     db = get_db_connection()
-    data = db.execute("SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)).fetchone()
+    data = db.execute(
+        "SELECT nbPoints FROM userPoints WHERE id_user=?", (id_user,)
+    ).fetchone()
     return data["nbPoints"]
 
 
@@ -195,10 +226,17 @@ def CreateNewUser(username, password):
     db = get_db_connection()
     row = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
     if row is None:
-        db.execute("INSERT INTO user (username, password) VALUES (?, ?)", (username, password))
+        db.execute(
+            "INSERT INTO user (username, password) VALUES (?, ?)", (username, password)
+        )
         db.commit()
-        row = db.execute("SELECT id FROM user WHERE username = ?", (username,)).fetchone()
-        db.execute("INSERT INTO userPoints (id_user, nbPoints, boost) VALUES (?, '0', '1')", (str(row["id"])))
+        row = db.execute(
+            "SELECT id FROM user WHERE username = ?", (username,)
+        ).fetchone()
+        db.execute(
+            "INSERT INTO userPoints (id_user, nbPoints, boost) VALUES (?, '0', '1')",
+            (str(row["id"])),
+        )
         db.commit()
 
         print("User " + username + " created")
@@ -210,11 +248,26 @@ def CreateNewBoost(label, pointToAdd, price, unique):
     db = get_db_connection()
     row = db.execute("SELECT * FROM store WHERE libelle = ?", (label,)).fetchone()
     if row is None:
-        db.execute("INSERT INTO store (libelle, pointToAdd, defaultPrice, uniqueBoost) VALUES (?, ?, ?, ?)", (label, pointToAdd, price, unique))
+        db.execute(
+            "INSERT INTO store (libelle, pointToAdd, defaultPrice, uniqueBoost) VALUES (?, ?, ?, ?)",
+            (label, pointToAdd, price, unique),
+        )
         db.commit()
         print("Boost " + label + " created")
     else:
-        print("Boost already exist, avoid creating Boost: " + str(row[0]), str(row[1]), str(row[2]), str(row[3]))
+        print(
+            "Boost already exist, avoid creating Boost: " + str(row[0]),
+            str(row[1]),
+            str(row[2]),
+            str(row[3]),
+        )
+
+
+def getName(id_user):
+    db = get_db_connection()
+    data = db.execute("SELECT username FROM user WHERE id=?", (id_user,)).fetchone()
+    return data["username"]
+
 
 CreateNewUser("Super", "test")
 CreateNewUser("Amaleo", "test")

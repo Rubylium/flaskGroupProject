@@ -1,18 +1,21 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}" />
     <title>Cookie</title>
   </head>
   <body>
+    <div>
+      <label>Connecté avec le compte : <span style="color:#f00;"> {{name}} </span> </label>
+    </div>
     <form action="{{url_for('logout')}}" method="post">
       <div class="button">
           <button type="submit">Deconnexion</button>
       </div>
     </form>
+
     <form action="{{url_for('click')}}" method="post">
       <div id="img">
         <button id="" class="" type="submit"><img src="{{url_for('static',filename='images/cookie.png')}}"/></button>
