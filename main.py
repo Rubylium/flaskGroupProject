@@ -1,8 +1,6 @@
 from flask import Flask, render_template, session, request, flash, url_for
 from markupsafe import escape
 import sqlite3
-from flask import g
-from werkzeug.security import check_password_hash
 from werkzeug.utils import redirect
 
 app = Flask(__name__)
