@@ -46,7 +46,9 @@ def click():
 
     priceBoost = getPrice(session["user_id"])
 
-    return render_template("clicker.html", rows=data, price=priceBoost)
+    name = getName(session["user_id"])
+
+    return render_template("clicker.html", rows=data, price=priceBoost, name=name)
 
 
 @app.route("/boost", methods=("POST",))
@@ -57,8 +59,9 @@ def boost():
     data = nbPoints(
         session["user_id"],
     )
+    name = getName(session["user_id"])
 
-    return render_template("clicker.html", rows=data, price=priceBoost)
+    return render_template("clicker.html", rows=data, price=priceBoost, name=name)
 
 
 @app.route("/<name>")
@@ -114,17 +117,6 @@ def GetAllUsersData():
         "SELECT * FROM user INNER JOIN userPoints ON user.id = userPoints.id_user"
     ).fetchall()
     return rows
-
-
-def PrintAllUsers():
-    print("Showing all users")
-
-    cursor = get_db_connection()
-    for row in cursor.execute("SELECT * FROM user"):
-        string = ""
-        for v in row:
-            string = string + " " + str(v)
-        print(string)
 
 
 def getPriceForStoreId(id_user, store_id):
@@ -271,7 +263,6 @@ def getName(id_user):
 
 CreateNewUser("Super", "test")
 CreateNewUser("Amaleo", "test")
-PrintAllUsers()
 
 CreateNewBoost("+1 points", 1, 20, 0)
 CreateNewBoost("+5 points", 5, 150, 0)
